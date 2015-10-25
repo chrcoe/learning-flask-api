@@ -4,20 +4,32 @@ from werkzeug.security import safe_str_cmp
 
 
 class User(object):
+    # TODO: replace this with ORM model (Flask-Security's user/role setup)
 
-    def __init__(self, id, username, password):
+    def __init__(self, id, username, password,
+                 first_name=None, last_name=None):
         self.id = id
         self.username = username
+        # TODO: obviously when building this out, should never allow the PW to
+        # be set directly
         self.password = password
 
-    def __str__(self):
-        return "User(id='%s')" % self.id
+    def __repr__(self):
+        return str(self)
 
+    def __str__(self):
+        # TODO: never want to make the password visible
+        attrs = vars(self)
+        return '<User: {' + \
+            ', '.join("%s: %s" % item for item in attrs.items()) + '}>'
+
+# TODO: replace this with a DB
 users = [
     User(1, 'user1', 'abcxyz'),
     User(2, 'user2', 'abcxyz'),
 ]
 
+# TODO: replace these with ORM in the functions instead of building tables here
 username_table = {u.username: u for u in users}
 userid_table = {u.id: u for u in users}
 
