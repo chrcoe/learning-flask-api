@@ -1,28 +1,6 @@
-# -*- coding: utf-8 -*-
-"""Extensions module. Each extension is initialized in the app factory located
-in app.py
-"""
-
-#  from flask_bcrypt import Bcrypt
-#  bcrypt = Bcrypt()
-
-#  from flask_login import LoginManager
-#  login_manager = LoginManager()
-
-#  from flask_sqlalchemy import SQLAlchemy
-#  db = SQLAlchemy()
-
-#  from flask_migrate import Migrate
-#  migrate = Migrate()
-
-#  from flask_cache import Cache
-#  cache = Cache()
-
-#  from flask_debugtoolbar import DebugToolbarExtension
-#  debug_toolbar = DebugToolbarExtension()
-
-from flask_jwt import JWT
-
+''' The User model and RESTful resource go here '''
+from werkzeug.security import safe_str_cmp
+from api.v1.extensions import jwt
 
 
 class User(object):
@@ -45,7 +23,7 @@ class User(object):
         return '<User: {' + \
             ', '.join("%s: %s" % item for item in attrs.items()) + '}>'
 
-# TODO: replace this with a DB
+# TODO: replace this with a DB (would be imported from api
 users = [
     User(1, 'user1', 'abcxyz'),
     User(2, 'user2', 'abcxyz'),
@@ -55,9 +33,6 @@ users = [
 username_table = {u.username: u for u in users}
 userid_table = {u.id: u for u in users}
 
-from werkzeug.security import safe_str_cmp
-
-jwt = JWT()
 
 @jwt.authentication_handler
 def authenticate(username, password):
