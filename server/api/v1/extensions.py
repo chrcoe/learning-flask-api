@@ -9,11 +9,11 @@ in app.py
 #  from flask_login import LoginManager
 #  login_manager = LoginManager()
 
-#  from flask_sqlalchemy import SQLAlchemy
-#  db = SQLAlchemy()
+from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy()
 
-#  from flask_migrate import Migrate
-#  migrate = Migrate()
+from flask_migrate import Migrate
+migrate = Migrate()
 
 #  from flask_cache import Cache
 #  cache = Cache()
@@ -26,4 +26,10 @@ jwt = JWT()
 #  have to import these to set the authentication_handler and identity_handler
 #  right away, but to prevent circular import, this import has to be run AFTER
 #  jwt is instantiated
-from api.v1.models import authenticate, identity
+from api.v1.models import authenticate, load_identity
+
+from flask_security import Security
+security = Security()
+
+from flask_principal import Principal
+principal = Principal()

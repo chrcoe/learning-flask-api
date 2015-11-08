@@ -29,3 +29,16 @@ then to use the token, GET whatever protected resource you need:
 
     User(id='1')
 
+To initialize and migrate the DB:
+
+    python server.py db init
+    python server.py db migrate
+    python server.py db upgrade
+
+To see the URL endpoints:
+
+    python server.py urls
+
+To run the development server:
+
+    python server.py runserver

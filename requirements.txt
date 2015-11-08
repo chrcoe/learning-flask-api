@@ -1,2 +1,4 @@
 Flask-JWT>=0.3.0
 Flask-Script
+Flask-Migrate
+Flask-Security

@@ -9,14 +9,17 @@ from api.v1.extensions import (
     jwt,  # flask-jwt
     #  bcrypt,  # flask-bcrypt
     #  cache,  # flask-cache
-    #  db,  # flask-sqlalchemy
+    db,  # flask-sqlalchemy
     #  login_manager,  # flask-login
-    #  migrate,  # flask-migrate
+    migrate,  # flask-migrate
     #  debug_toolbar,  # flask-debug toolbar
+    security,  # flask-security
+    principal,  # flask-principal
 )
 from api.v1 import endpoints
 from api.v1 import api_bp
 #  from api import public, user # won't use these since its an API ONLY
+from api.v1.models import user_datastore
 
 
 def create_app(config_object=ProdConfig):
@@ -41,16 +44,18 @@ def register_extensions(app):
     #  assets.init_app(app)
     #  bcrypt.init_app(app)
     #  cache.init_app(app)
-    #  db.init_app(app)
+    db.init_app(app)
     #  login_manager.init_app(app)
     #  debug_toolbar.init_app(app)
-    #  migrate.init_app(app, db)
+    migrate.init_app(app, db)
+    security.init_app(app, user_datastore)
+    principal.init_app(app)
     return None
 
 
 def register_blueprints(app):
     # TODO: figure out blueprints for API
-    app.register_blueprints(api_bp, url_prefix='/v1.0')
+    app.register_blueprint(api_bp, url_prefix='/v1.0')
     #  app.register_blueprint(public.views.blueprint)
     #  app.register_blueprint(user.views.blueprint)
     return None

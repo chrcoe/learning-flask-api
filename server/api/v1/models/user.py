@@ -1,48 +1,69 @@
-''' The User model and RESTful resource go here '''
-from werkzeug.security import safe_str_cmp
+''' The User and Roles models go here '''
 from api.v1.extensions import jwt
+from api.v1.extensions import db
+from flask.ext.security import UserMixin, RoleMixin, SQLAlchemyUserDatastore
+from flask.ext.security.utils import encrypt_password, verify_password
 
 
-class User(object):
-    # TODO: replace this with ORM model (Flask-Security's user/role setup)
+roles_users = db.Table(
+    'roles_users',
+    db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
+    db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
+)
 
-    def __init__(self, id, username, password,
-                 first_name=None, last_name=None):
-        self.id = id
-        self.username = username
-        # TODO: obviously when building this out, should never allow the PW to
-        # be set directly
-        self.password = password
+
+class User(db.Model, UserMixin):
+    ''' Uses the email as the username ... '''
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), unique=True)
+    # custom password and hashing...
+    password = db.Column(db.String(50))
+    password_hash = db.Column(db.String(255))
+    active = db.Column(db.Boolean())
+    confirmed_at = db.Column(db.DateTime())
+    roles = db.relationship('Role', secondary=roles_users,
+                            backref=db.backref('users', lazy='dynamic'))
+    last_login_at = db.Column(db.DateTime())
+    current_login_at = db.Column(db.DateTime())
+    last_login_ip = db.Column(db.String(255))
+    current_login_ip = db.Column(db.String(255))
+    login_count = db.Column(db.Integer)
+
+    @property
+    def password(self):
+        ''' do NOT allow anything read a User's password, EVER '''
+        raise AttributeError('password is not a readable attribute')
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = encrypt_password(password)
 
     def __repr__(self):
-        return str(self)
+        return '<models.User[email=%s]>' % self.email
 
-    def __str__(self):
-        # TODO: never want to make the password visible
-        attrs = vars(self)
-        return '<User: {' + \
-            ', '.join("%s: %s" % item for item in attrs.items()) + '}>'
 
-# TODO: replace this with a DB (would be imported from api
-users = [
-    User(1, 'user1', 'abcxyz'),
-    User(2, 'user2', 'abcxyz'),
-]
+class Role(db.Model, RoleMixin):
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(80), unique=True)
+    description = db.Column(db.String(255))
 
-# TODO: replace these with ORM in the functions instead of building tables here
-username_table = {u.username: u for u in users}
-userid_table = {u.id: u for u in users}
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 
 
 @jwt.authentication_handler
 def authenticate(username, password):
-    user = username_table.get(username, None)
-    if user and safe_str_cmp(user.password.encode('utf-8'),
-                             password.encode('utf-8')):
+    ''' Auth based on username/password. '''
+    user = user_datastore.find_user(email=username)
+    if user and username == user.email \
+            and verify_password(password, user.password_hash):
+
         return user
+    return None
 
 
 @jwt.identity_handler
-def identity(payload):
+def load_identity(payload):
+    ''' Load the identity requested in the payload if valid. '''
     user_id = payload['identity']
-    return userid_table.get(user_id, None)
+    user = user_datastore.find_user(id=user_id)
+    return user
