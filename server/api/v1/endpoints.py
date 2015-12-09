@@ -1,7 +1,9 @@
 ''' All API endpoints go here '''
+from flask import render_template
 from flask_jwt import jwt_required, current_identity
 from flask_security.decorators import roles_required, auth_token_required
 #  from flask_principal import Permission, RoleNeed
+
 
 def init_endpoints(app):
     ''' Sets up all endpoints for the API. '''
@@ -20,7 +22,6 @@ def init_endpoints(app):
 
     #  admin_permission = Permission(RoleNeed('admin'))
 
-
     @app.route('/admin', methods=['GET'])
     #  @admin_permission.require()
     @roles_required('admin')
@@ -29,3 +30,8 @@ def init_endpoints(app):
         ''' sample protected function which just returns
         the identity of the caller. '''
         return '%s' % current_identity
+
+    # provided views
+    @app.route('/')
+    def home():
+        return render_template('index.html')
